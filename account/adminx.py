@@ -9,8 +9,6 @@ from django.contrib.auth.forms import UserChangeForm
 from xadmin.layout import Fieldset, Main, Side#, Row#, FormHelper
 from xadmin.plugins.auth import PermissionModelMultipleChoiceField
 xadmin.site.unregister(User)
-# xadmin.site.unregister(Group)
-# xadmin.site.unregister(Permission)
 from xadmin.views import BaseAdminView, CommAdminView
 
 class BaseSetting(object):
@@ -122,9 +120,16 @@ xadmin.site.register(User, UserAdmin)
 
 class KeyAdmin(object):
     list_display = ('name', 'key', 'desc')
-    exclude = ('user', )
+    # exclude = ('user', )
+    readonly_fields = ('user', )
 
     def save_models(self):
         self.new_obj.user = self.request.user
         self.new_obj.save()
+
+    def get_list_queryset(self):
+        qs = super(KeyAdmin, self).get_list_queryset()
+        if self.request.user.is_superuser:
+            return qs
+        return qs.filter(user=self.request.user)
 xadmin.site.register(Key, KeyAdmin)

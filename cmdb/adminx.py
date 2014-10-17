@@ -5,16 +5,24 @@ from cmdb.models import Host, Group, IDC
 
 
 class HostAdmin(object):
-    list_display = ('hostname', 'ipaddr', 'login_type', 'login_type', 'username')
+    list_display = ('hostname', 'ipaddr', 'login_type', 'username', 'groups', 'users', 'idc')
     reversion_enable = True
     model_icon = 'fa fa-laptop'
-    style_fields = {'users': 'checkbox-inline'}
+    style_fields = {'users': 'checkbox-inline', 'groups': 'checkbox-inline'}
+    list_per_page = 20
+    search_fields = ('groups', 'hostname', 'users')
 
     def get_media(self):
         media = super(HostAdmin, self).get_media()
         # media = media + self.form_obj.media
         media.add_js([self.static('custom/js/xadmin.cmdb.host.js')])
         return media
+
+    def get_list_queryset(self):
+        qs = super(HostAdmin, self).get_list_queryset()
+        if self.request.user.is_superuser:
+            return qs
+        return qs.filter(users=self.request.user)
 xadmin.site.register(Host, HostAdmin)
 
 

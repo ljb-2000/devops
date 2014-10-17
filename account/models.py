@@ -4,6 +4,8 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.db import models
 from django.utils import timezone
 from hashlib import md5
+import os.path
+import time
 
 
 class UserManager(BaseUserManager):
@@ -59,11 +61,17 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name = '用户'
         verbose_name_plural = verbose_name
 
+
+def get_key_path(instance, filename):
+    t = time.localtime()
+    return "%(user)s/keys/%(year)d/%(mon)d/%(day)d/%(filename)s" % {'user': str(instance.user.username), 'year': t.tm_year, 'mon': t.tm_mon, 'day': t.tm_mday, 'filename': filename}
+
+
 class Key(models.Model):
     name = models.CharField('名称', blank=False, null=False, max_length=50)
-    key = models.FileField('密钥', upload_to='keys')
-    desc = models.CharField('描述', blank=True, null=True, max_length=255)
     user = models.ForeignKey(User, verbose_name='用户')
+    key = models.FileField('密钥', upload_to=get_key_path)
+    desc = models.CharField('描述', blank=True, null=True, max_length=255)
 
     def __unicode__(self):
         return self.name

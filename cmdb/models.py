@@ -36,7 +36,7 @@ class Host(models.Model):
         ('password', '密码'),
         ('key', '密钥')
     )
-    hostname = models.CharField('主机名', null=False, blank=False, max_length=100)
+    hostname = models.CharField('主机名', null=False, blank=False, max_length=100, unique=True)
     ipaddr = models.IPAddressField('IP地址', null=False, blank=False, max_length=15)
     username = models.CharField('账号', null=False, blank=False, max_length=20, default='root')
     login_type = models.CharField('认证方式', null=False, blank=False, max_length=10, default='key', choices=LOGIN_TYPE)
@@ -44,7 +44,7 @@ class Host(models.Model):
     private_key = models.ForeignKey(Key, verbose_name='密钥', blank=True, null=True)
     port = models.CharField('端口', null=False, blank=False, max_length=10, default='22')
     idc = models.ForeignKey(IDC, verbose_name='机房')
-    group = models.ForeignKey(Group, verbose_name='组')
+    groups = models.ManyToManyField(Group, verbose_name='组', related_name='hosts')
     users = models.ManyToManyField(User, verbose_name='管理人')
 
     def __unicode__(self):
